@@ -100,19 +100,6 @@ body{min-height:100dvh;display:flex;flex-direction:column;align-items:center}
 .setup-btn.active-a{background:#3b82f618;border-color:var(--blue);color:var(--blue)}
 .setup-btn.active-b{background:#f9731618;border-color:var(--orange);color:var(--orange)}
 .setup-btn:hover:not(.active-a):not(.active-b){border-color:var(--faint);color:var(--text)}
-.banner{border-radius:var(--radius);padding:16px 18px;display:flex;align-items:center;gap:14px;border:1.5px solid transparent;transition:all .3s}
-.banner.go{background:var(--green-dim);border-color:var(--green)}
-.banner.stop{background:var(--red-dim);border-color:var(--red)}
-.banner.wait{background:var(--orange-dim);border-color:var(--orange)}
-.banner-icon{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
-.banner.go .banner-icon{background:#22c55e22}
-.banner.stop .banner-icon{background:#ef444422}
-.banner.wait .banner-icon{background:#f9731622}
-.banner-title{font-size:16px;font-weight:700;line-height:1.2}
-.banner.go .banner-title{color:var(--green)}
-.banner.stop .banner-title{color:var(--red)}
-.banner.wait .banner-title{color:var(--orange)}
-.banner-sub{font-size:12px;color:var(--muted);margin-top:3px}
 .limit-bar-wrap{margin-top:10px}
 .limit-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
 .limit-label{font-size:11px;font-family:var(--font-mono);color:var(--muted)}
@@ -187,13 +174,6 @@ body{min-height:100dvh;display:flex;flex-direction:column;align-items:center}
   <div class="date-badge" id="dateBadge"></div>
 </header>
 <main class="main">
-  <div class="banner wait" id="mainBanner">
-    <div class="banner-icon">⏳</div>
-    <div class="banner-text">
-      <div class="banner-title" id="bannerTitle">Выбери сетап</div>
-      <div class="banner-sub" id="bannerSub">Отметь все пункты чеклиста</div>
-    </div>
-  </div>
   <div class="card">
     <div class="card-title"><span></span>Сетап</div>
     <div class="setup-row">
@@ -268,7 +248,6 @@ body{min-height:100dvh;display:flex;flex-direction:column;align-items:center}
 </div>
 
 <script>
-// ── MORNING LOGIC ──
 const MORNING_TOTAL = 3;
 let morningChecked = [false, false, false];
 
@@ -284,15 +263,11 @@ function toggleMorning(el, idx) {
   const done = morningChecked.filter(Boolean).length;
   document.getElementById('morningProgressFill').style.width = (done / MORNING_TOTAL * 100) + '%';
   if (done === MORNING_TOTAL) {
-    const msg = document.getElementById('morningDoneMsg');
-    msg.classList.add('show');
-    setTimeout(() => {
-      document.getElementById('morningScreen').classList.add('hidden');
-    }, 1200);
+    document.getElementById('morningDoneMsg').classList.add('show');
+    setTimeout(() => document.getElementById('morningScreen').classList.add('hidden'), 1200);
   }
 }
 
-// ── MAIN LOGIC ──
 let setup = null, trades = [], mood = null;
 const LIMIT = 3, DAY_LOSS = 10;
 
@@ -303,32 +278,11 @@ function selectSetup(s) {
   document.getElementById('btnA').className = 'setup-btn' + (s === 'A' ? ' active-a' : '');
   document.getElementById('btnB').className = 'setup-btn' + (s === 'B' ? ' active-b' : '');
   document.querySelectorAll('#checklist' + s + ' .check-item').forEach(i => i.classList.remove('checked'));
-  updateBanner();
 }
-function toggle(el) { el.classList.toggle('checked'); updateBanner(); }
-function updateBanner() {
-  const losses = trades.filter(t => t === 'L').length;
-  if (losses * 5 >= DAY_LOSS) { setBanner('stop', '🛑 СТОП-ДЕНЬ', 'Дневной лимит убытка достигнут. Отдыхай.'); return; }
-  if (trades.length >= LIMIT) { setBanner('stop', 'ЛИМИТ СДЕЛОК', 'Максимум ' + LIMIT + ' сделки в день достигнут'); return; }
-  if (mood && ['😤', '😨', '😴'].includes(mood)) { setBanner('stop', '❌ НЕ ТОРГУЙ', 'Состояние не позволяет. Только наблюдение.'); return; }
-  if (!setup) { setBanner('wait', 'Выбери сетап', 'Отметь все пункты чеклиста'); return; }
-  const items = document.querySelectorAll('#checklist' + setup + ' .check-item');
-  const checked = document.querySelectorAll('#checklist' + setup + ' .check-item.checked').length;
-  if (checked === 0) { setBanner('wait', 'Пройди чеклист', 'Отметь все условия'); return; }
-  if (checked < items.length) { setBanner('wait', checked + '/' + items.length + ' условий', 'Осталось ' + (items.length - checked)); return; }
-  setBanner('go', '✅ МОЖНО ВХОДИТЬ', 'Все условия соблюдены · Риск 5%');
-}
-function setBanner(type, title, sub) {
-  const b = document.getElementById('mainBanner');
-  b.className = 'banner ' + type;
-  const icons = { go: '✅', stop: '🛑', wait: '⏳' };
-  b.querySelector('.banner-icon').textContent = icons[type] || '';
-  document.getElementById('bannerTitle').textContent = title;
-  document.getElementById('bannerSub').textContent = sub;
-}
+function toggle(el) { el.classList.toggle('checked'); }
 function addTrade(r) {
   if (trades.length >= LIMIT) return;
-  trades.push(r); renderStreak(); renderLimits(); updateBanner();
+  trades.push(r); renderStreak(); renderLimits();
 }
 function renderStreak() {
   const row = document.getElementById('streakRow'); row.innerHTML = '';
@@ -356,9 +310,8 @@ function setMood(btn, m) {
   btn.classList.add('selected'); mood = m;
   const warn = document.getElementById('moodWarning');
   if (['😤', '😨', '😴'].includes(m)) { warn.textContent = '⚠ Торговля запрещена в этом состоянии'; warn.style.color = 'var(--red)'; }
-  else if (m === '🤑') { warn.textContent = '⚠ Жадность — стой строго на плане. Не увеличивай риск.'; warn.style.color = 'var(--orange)'; }
+  else if (m === '🤑') { warn.textContent = '⚠ Жадность — стой строго на плане'; warn.style.color = 'var(--orange)'; }
   else { warn.textContent = '✓ Состояние позволяет торговать'; warn.style.color = 'var(--green)'; }
-  updateBanner();
 }
 function resetDay() {
   trades = []; mood = null; setup = null;
@@ -373,9 +326,9 @@ function resetDay() {
   document.getElementById('checklistA').style.display = 'none';
   document.getElementById('checklistB').style.display = 'none';
   document.getElementById('moodWarning').textContent = '';
-  renderStreak(); renderLimits(); updateBanner();
+  renderStreak(); renderLimits();
 }
-renderStreak(); renderLimits(); updateBanner();
+renderStreak(); renderLimits();
 </script>
 </body>
 </html>
