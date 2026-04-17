@@ -20,6 +20,36 @@
 html{background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:16px;-webkit-font-smoothing:antialiased}
 body{min-height:100dvh;display:flex;flex-direction:column;align-items:center}
 
+/* STOP OVERLAY */
+#stopOverlay{
+  position:fixed;inset:0;z-index:200;
+  background:#0d0e10ee;
+  display:none;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:32px;
+  backdrop-filter:blur(6px);
+  -webkit-backdrop-filter:blur(6px);
+}
+#stopOverlay.show{display:flex;}
+.stop-overlay-box{
+  background:var(--surface);border:1.5px solid var(--red);
+  border-radius:var(--radius);padding:32px 28px;
+  max-width:360px;width:100%;text-align:center;
+  box-shadow:0 0 60px #ef444433;
+}
+.stop-icon{font-size:48px;margin-bottom:16px;}
+.stop-title{font-size:22px;font-weight:700;color:var(--red);margin-bottom:8px;}
+.stop-sub{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:24px;}
+.stop-reset{
+  padding:12px 24px;border-radius:var(--radius-sm);
+  background:var(--red-dim);border:1.5px solid var(--red);
+  color:var(--red);font-family:var(--font-body);font-size:13px;font-weight:700;
+  cursor:pointer;transition:all .15s;
+}
+.stop-reset:hover{background:#ef444433;}
+
 /* MORNING */
 #morningScreen{
   position:fixed;inset:0;background:var(--bg);z-index:100;
@@ -50,7 +80,8 @@ body{min-height:100dvh;display:flex;flex-direction:column;align-items:center}
 .morning-done-msg.show{opacity:1;}
 
 /* MAIN */
-#appScreen{width:100%;display:flex;flex-direction:column;align-items:center;}
+#appScreen{width:100%;display:flex;flex-direction:column;align-items:center;transition:filter .3s;}
+#appScreen.blurred{filter:blur(3px);pointer-events:none;user-select:none;}
 .header{width:100%;max-width:520px;display:flex;align-items:center;justify-content:space-between;padding:20px 20px 0}
 .logo{display:flex;align-items:center;gap:10px}
 .logo svg{width:28px;height:28px}
@@ -85,54 +116,20 @@ body{min-height:100dvh;display:flex;flex-direction:column;align-items:center}
 .setup-btn.active-a{background:#3b82f618;border-color:var(--blue);color:var(--blue)}
 .setup-btn.active-b{background:#f9731618;border-color:var(--orange);color:var(--orange)}
 .setup-btn:hover:not(.active-a):not(.active-b){border-color:var(--faint);color:var(--text)}
-
-/* COMPACT PARAM ROW */
-.param-strip{
-  display:flex;gap:6px;margin-top:4px;padding-top:10px;
-  border-top:1px solid var(--border);
-  position:relative;
-}
-.pchip{
-  position:relative;
-  flex:1;
-}
-.pchip-btn{
-  width:100%;padding:6px 8px;
-  border-radius:var(--radius-sm);
-  border:1px solid var(--border);
-  background:var(--surface2);
-  color:var(--muted);
-  font-family:var(--font-mono);font-size:12px;font-weight:600;
-  cursor:pointer;transition:all .15s;
-  display:flex;align-items:center;justify-content:space-between;gap:4px;
-  white-space:nowrap;
-}
+.param-strip{display:flex;gap:6px;margin-top:4px;padding-top:10px;border-top:1px solid var(--border);position:relative;}
+.pchip{position:relative;flex:1;}
+.pchip-btn{width:100%;padding:6px 8px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface2);color:var(--muted);font-family:var(--font-mono);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:space-between;gap:4px;white-space:nowrap;}
 .pchip-btn:hover{border-color:var(--faint);color:var(--text)}
 .pchip-btn.active-asset{border-color:#3b82f666;color:var(--blue)}
 .pchip-btn.active-lev{border-color:#eab30866;color:var(--gold)}
 .pchip-btn.active-long{border-color:#22c55e66;color:var(--green)}
 .pchip-btn.active-short{border-color:#ef444466;color:var(--red)}
 .pchip-arrow{font-size:8px;opacity:.5}
-.pdropdown{
-  position:absolute;top:calc(100% + 5px);left:0;
-  min-width:100%;background:var(--surface2);
-  border:1px solid var(--border);
-  border-radius:var(--radius-sm);
-  overflow:hidden;z-index:50;
-  display:none;
-  box-shadow:0 8px 24px #00000066;
-}
+.pdropdown{position:absolute;top:calc(100% + 5px);left:0;min-width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;z-index:50;display:none;box-shadow:0 8px 24px #00000066;}
 .pdropdown.open{display:block;}
-.pdrop-item{
-  padding:8px 12px;
-  font-family:var(--font-mono);font-size:12px;font-weight:600;
-  color:var(--muted);cursor:pointer;transition:background .1s;
-  white-space:nowrap;
-}
+.pdrop-item{padding:8px 12px;font-family:var(--font-mono);font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;transition:background .1s;white-space:nowrap;}
 .pdrop-item:hover{background:var(--border);color:var(--text)}
 .pdrop-item.sel{color:var(--text)}
-
-/* REST */
 .limit-bar-wrap{margin-top:10px}
 .limit-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
 .limit-label{font-size:11px;font-family:var(--font-mono);color:var(--muted)}
@@ -150,10 +147,39 @@ body{min-height:100dvh;display:flex;flex-direction:column;align-items:center}
 .mood-btn{flex:1;padding:8px 6px;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:transparent;cursor:pointer;font-size:18px;transition:all .15s;display:flex;align-items:center;justify-content:center}
 .mood-btn:hover{border-color:var(--faint)}
 .mood-btn.selected{border-color:var(--gold);background:#eab30811}
+/* MENTOR REPORT */
+.mentor-textarea{
+  width:100%;min-height:220px;
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:var(--radius-sm);padding:12px;
+  color:var(--text);font-family:var(--font-mono);font-size:12px;line-height:1.7;
+  resize:vertical;outline:none;transition:border .15s;
+}
+.mentor-textarea:focus{border-color:var(--faint);}
+.mentor-copy{
+  margin-top:8px;width:100%;padding:9px;
+  border-radius:var(--radius-sm);
+  border:1px solid var(--border);background:var(--surface2);
+  color:var(--muted);font-family:var(--font-body);font-size:12px;font-weight:600;
+  cursor:pointer;transition:all .15s;
+}
+.mentor-copy:hover{border-color:var(--faint);color:var(--text)}
+.mentor-copy.copied{border-color:var(--green);color:var(--green)}
 </style>
 </head>
 <body>
 
+<!-- STOP DAY OVERLAY -->
+<div id="stopOverlay">
+  <div class="stop-overlay-box">
+    <div class="stop-icon">🛑</div>
+    <div class="stop-title">СТОП-ДЕНЬ</div>
+    <div class="stop-sub">Дневной лимит убытка <strong style="color:var(--red)">10%</strong> достигнут.<br>Торговля заблокирована до следующего дня.<br>Закрой терминал и отдохни.</div>
+    <button class="stop-reset" onclick="resetDay()">↺ Сбросить день</button>
+  </div>
+</div>
+
+<!-- MORNING SCREEN -->
 <div id="morningScreen">
   <div class="morning-wrap">
     <div class="morning-header">
@@ -178,6 +204,7 @@ body{min-height:100dvh;display:flex;flex-direction:column;align-items:center}
   </div>
 </div>
 
+<!-- MAIN APP -->
 <div id="appScreen">
 <header class="header">
   <div class="logo">
@@ -194,6 +221,8 @@ body{min-height:100dvh;display:flex;flex-direction:column;align-items:center}
   <div class="date-badge" id="dateBadge"></div>
 </header>
 <main class="main">
+
+  <!-- SETUP CARD -->
   <div class="card">
     <div class="card-title"><span></span>Сетап</div>
     <div class="setup-row">
@@ -206,10 +235,7 @@ body{min-height:100dvh;display:flex;flex-direction:column;align-items:center}
         <span class="setup-desc">контртренд</span>
       </button>
     </div>
-
-    <!-- PARAM STRIP -->
     <div class="param-strip">
-      <!-- ASSET -->
       <div class="pchip" id="chip-asset">
         <button class="pchip-btn active-asset" id="btn-asset" onclick="toggleDrop('asset')"><span id="val-asset">BTC</span><span class="pchip-arrow">▼</span></button>
         <div class="pdropdown" id="drop-asset">
@@ -218,7 +244,6 @@ body{min-height:100dvh;display:flex;flex-direction:column;align-items:center}
           <div class="pdrop-item" onclick="pickParam('asset','GOLD')">GOLD</div>
         </div>
       </div>
-      <!-- LEV -->
       <div class="pchip" id="chip-lev">
         <button class="pchip-btn active-lev" id="btn-lev" onclick="toggleDrop('lev')"><span id="val-lev">X50</span><span class="pchip-arrow">▼</span></button>
         <div class="pdropdown" id="drop-lev">
@@ -226,7 +251,6 @@ body{min-height:100dvh;display:flex;flex-direction:column;align-items:center}
           <div class="pdrop-item" onclick="pickParam('lev','X25')">X25</div>
         </div>
       </div>
-      <!-- DIR -->
       <div class="pchip" id="chip-dir">
         <button class="pchip-btn active-long" id="btn-dir" onclick="toggleDrop('dir')"><span id="val-dir">LONG</span><span class="pchip-arrow">▼</span></button>
         <div class="pdropdown" id="drop-dir">
@@ -237,6 +261,7 @@ body{min-height:100dvh;display:flex;flex-direction:column;align-items:center}
     </div>
   </div>
 
+  <!-- CHECKLISTS -->
   <div class="card" id="checklistA" style="display:none">
     <div class="card-title"><span style="background:var(--blue)"></span>OLEGator — чеклист</div>
     <div class="check-item" onclick="toggle(this)"><div class="check-icon"><svg width="12" height="12" viewBox="0 0 12 12"><polyline points="1.5,6 4.5,9 10.5,3" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="check-text"><div class="check-label">Аллигатор проснулся и ест</div><div class="check-detail">Lips > Teeth > Jaw · линии расходятся</div></div></div>
@@ -256,6 +281,7 @@ body{min-height:100dvh;display:flex;flex-direction:column;align-items:center}
     <div class="check-item" onclick="toggle(this)"><div class="check-icon"><svg width="12" height="12" viewBox="0 0 12 12"><polyline points="1.5,6 4.5,9 10.5,3" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="check-text"><div class="check-label">Стоп и тейки выставлены по сетке Фибоначчи</div><div class="check-detail">SL / TP1 / TP2 на уровнях Fib до входа</div></div></div>
   </div>
 
+  <!-- RISK -->
   <div class="card">
     <div class="card-title"><span></span>Риск-менеджмент</div>
     <div class="status-row">
@@ -266,7 +292,7 @@ body{min-height:100dvh;display:flex;flex-direction:column;align-items:center}
       </div>
       <div class="stat-box">
         <div class="stat-label">Стоп на сделку</div>
-        <div class="stat-value green">5%</div>
+        <div class="stat-value neutral">5%</div>
         <div class="stat-sub">от депозита</div>
       </div>
     </div>
@@ -283,6 +309,8 @@ body{min-height:100dvh;display:flex;flex-direction:column;align-items:center}
     </div>
     <div class="streak-row" id="streakRow"></div>
   </div>
+
+  <!-- MOOD -->
   <div class="card">
     <div class="card-title"><span></span>Состояние</div>
     <div class="mood-row">
@@ -294,16 +322,24 @@ body{min-height:100dvh;display:flex;flex-direction:column;align-items:center}
     </div>
     <div style="margin-top:10px;font-size:11px;font-family:var(--font-mono)" id="moodWarning"></div>
   </div>
+
+  <!-- MENTOR REPORT -->
+  <div class="card">
+    <div class="card-title"><span></span>Отчёт для ментора</div>
+    <textarea class="mentor-textarea" id="mentorText" spellcheck="false"></textarea>
+    <button class="mentor-copy" id="mentorCopyBtn" onclick="copyMentor()">📋 Скопировать</button>
+  </div>
+
   <button class="reset-btn" onclick="resetDay()">↺ Сбросить день</button>
 </main>
 </div>
 
 <script>
-const MORNING_TOTAL = 3;
-let morningChecked = [false,false,false];
-const d = new Date();
-document.getElementById('morningDate').textContent = d.toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long'});
-document.getElementById('dateBadge').textContent = d.toLocaleDateString('ru-RU',{day:'numeric',month:'short',year:'numeric'});
+const MORNING_TOTAL=3;
+let morningChecked=[false,false,false];
+const d=new Date();
+document.getElementById('morningDate').textContent=d.toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long'});
+document.getElementById('dateBadge').textContent=d.toLocaleDateString('ru-RU',{day:'numeric',month:'short',year:'numeric'});
 
 function toggleMorning(el,idx){
   morningChecked[idx]=!morningChecked[idx];
@@ -320,7 +356,6 @@ let setup=null,trades=[],mood=null;
 const LIMIT=3,DAY_LOSS=10;
 const params={asset:'BTC',lev:'X50',dir:'LONG'};
 
-// dropdown logic
 function toggleDrop(type){
   const isOpen=document.getElementById('drop-'+type).classList.contains('open');
   closeAllDrops();
@@ -332,25 +367,20 @@ function closeAllDrops(){
 document.addEventListener('click',function(e){
   if(!e.target.closest('.pchip')) closeAllDrops();
 });
-
-const dirClass={LONG:'active-long',SHORT:'active-short'};
 const typeClass={asset:'active-asset',lev:'active-lev'};
-
 function pickParam(type,val){
   params[type]=val;
   document.getElementById('val-'+type).textContent=val;
-  // update button style
   const btn=document.getElementById('btn-'+type);
   btn.className='pchip-btn';
   if(type==='dir') btn.classList.add(val==='LONG'?'active-long':'active-short');
   else btn.classList.add(typeClass[type]);
-  // mark selected in dropdown
   document.querySelectorAll('#drop-'+type+' .pdrop-item').forEach(item=>{
-    item.classList.toggle('sel',item.textContent===val);
+    item.classList.toggle('sel',item.textContent.trim()===val);
   });
   closeAllDrops();
+  updateMentorReport();
 }
-
 function selectSetup(s){
   setup=s;
   document.getElementById('checklistA').style.display=s==='A'?'block':'none';
@@ -358,10 +388,14 @@ function selectSetup(s){
   document.getElementById('btnA').className='setup-btn'+(s==='A'?' active-a':'');
   document.getElementById('btnB').className='setup-btn'+(s==='B'?' active-b':'');
   document.querySelectorAll('#checklist'+s+' .check-item').forEach(i=>i.classList.remove('checked'));
+  updateMentorReport();
 }
-function toggle(el){el.classList.toggle('checked');}
+function toggle(el){
+  el.classList.toggle('checked');
+  updateMentorReport();
+}
 function addTrade(r){
-  if(trades.length>=LIMIT)return;
+  if(trades.length>=LIMIT) return;
   trades.push(r);renderStreak();renderLimits();
 }
 function renderStreak(){
@@ -384,6 +418,10 @@ function renderLimits(){
   const bar=document.getElementById('dailyLossBar');
   bar.style.width=fill+'%';
   bar.style.background=fill>=100?'var(--red)':fill>=60?'var(--orange)':'var(--green)';
+  if(pct>=DAY_LOSS){
+    document.getElementById('stopOverlay').classList.add('show');
+    document.getElementById('appScreen').classList.add('blurred');
+  }
 }
 function setMood(btn,m){
   document.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('selected'));
@@ -393,6 +431,69 @@ function setMood(btn,m){
   else if(m==='🤑'){warn.textContent='⚠ Жадность — стой строго на плане';warn.style.color='var(--orange)';}
   else{warn.textContent='✓ Состояние позволяет торговать';warn.style.color='var(--green)';}
 }
+
+// MENTOR REPORT
+const checklistLabelsA=[
+  'Аллигатор проснулся и ест',
+  'Gator оба ряда не красные',
+  'Фрактал завершён (5 свечей)',
+  'AO в сторону сделки',
+  'HTF тренд не против',
+  'SL за противоположным фракталом'
+];
+const checklistLabelsB=[
+  'RSI 30m выше 70 или ниже 30',
+  'RSI 1h выше 70 или ниже 30',
+  'Цена у сильного уровня поддержки/сопротивления',
+  'Цена у трендовой линии',
+  'Разворотная свеча / формация',
+  'Стоп и тейки выставлены по сетке Фибоначчи'
+];
+function getCheckedLabels(){
+  if(!setup) return [];
+  const labels=setup==='A'?checklistLabelsA:checklistLabelsB;
+  const items=document.querySelectorAll('#checklist'+setup+' .check-item');
+  const result=[];
+  items.forEach((item,i)=>{
+    if(item.classList.contains('checked')) result.push('✅ '+labels[i]);
+    else result.push('⬜ '+labels[i]);
+  });
+  return result;
+}
+function updateMentorReport(){
+  const dir=params.dir;
+  const asset=params.asset;
+  const lev=params.lev;
+  const strat=setup==='A'?'OLEGator':setup==='B'?'RSI30m':'—';
+  const checklist=getCheckedLabels();
+  const checkStr=checklist.length>0?checklist.join('\n'):'(чеклист не выбран)';
+  const text=
+`Привет брат!
+
+Взял ${dir} по ${asset} ${lev} по стратегии ${strat}
+
+Чеклист:
+${checkStr}
+
+ТВХ:
+Лимитка на добор:
+Стоп:
+
+Тейки:
+
+Мысли:`;
+  document.getElementById('mentorText').value=text;
+}
+function copyMentor(){
+  const ta=document.getElementById('mentorText');
+  navigator.clipboard.writeText(ta.value).then(()=>{
+    const btn=document.getElementById('mentorCopyBtn');
+    btn.textContent='✓ Скопировано';
+    btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='📋 Скопировать';btn.classList.remove('copied');},2000);
+  });
+}
+
 function resetDay(){
   trades=[];mood=null;setup=null;
   morningChecked=[false,false,false];
@@ -406,10 +507,12 @@ function resetDay(){
   document.getElementById('checklistA').style.display='none';
   document.getElementById('checklistB').style.display='none';
   document.getElementById('moodWarning').textContent='';
+  document.getElementById('stopOverlay').classList.remove('show');
+  document.getElementById('appScreen').classList.remove('blurred');
   pickParam('asset','BTC');pickParam('lev','X50');pickParam('dir','LONG');
-  renderStreak();renderLimits();
+  renderStreak();renderLimits();updateMentorReport();
 }
-renderStreak();renderLimits();
+renderStreak();renderLimits();updateMentorReport();
 </script>
 </body>
 </html>
