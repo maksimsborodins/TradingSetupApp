@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trading Cockpit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d0e10;--surface:#13151a;--surface2:#1a1d24;--border:#252830;
+  --text:#e8eaf0;--muted:#6b7280;--faint:#3a3f4a;
+  --green:#22c55e;--green-dim:#16a34a22;--red:#ef4444;--red-dim:#dc262622;
+  --orange:#f97316;--orange-dim:#ea580c22;--blue:#3b82f6;--gold:#eab308;
+  --radius:10px;--radius-sm:6px;
+  --font-body:'Space Grotesk',sans-serif;--font-mono:'JetBrains Mono',monospace;
+}
+html{background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:16px;-webkit-font-smoothing:antialiased}
+body{min-height:100dvh;display:flex;flex-direction:column;align-items:center}
+.header{width:100%;max-width:520px;display:flex;align-items:center;justify-content:space-between;padding:20px 20px 0}
+.logo{display:flex;align-items:center;gap:10px}
+.logo svg{width:28px;height:28px}
+.logo-text{font-size:15px;font-weight:600;letter-spacing:.5px}
+.logo-sub{font-size:11px;color:var(--muted);font-family:var(--font-mono)}
+.date-badge{font-size:11px;font-family:var(--font-mono);color:var(--muted);background:var(--surface);border:1px solid var(--border);padding:5px 10px;border-radius:var(--radius-sm)}
+.main{width:100%;max-width:520px;padding:16px 20px 40px;display:flex;flex-direction:column;gap:12px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px}
+.card-title{font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.card-title span{width:6px;height:6px;border-radius:50%;background:var(--faint)}
+.status-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px}
+.stat-box{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;display:flex;flex-direction:column;gap:4px}
+.stat-label{font-size:10px;font-family:var(--font-mono);color:var(--muted);letter-spacing:.5px;text-transform:uppercase}
+.stat-value{font-size:22px;font-weight:700;font-family:var(--font-mono);line-height:1}
+.stat-value.green{color:var(--green)}.stat-value.red{color:var(--red)}.stat-value.orange{color:var(--orange)}.stat-value.neutral{color:var(--text)}
+.stat-sub{font-size:10px;color:var(--muted);font-family:var(--font-mono)}
+.check-item{display:flex;align-items:flex-start;gap:12px;cursor:pointer;transition:background .15s;border-radius:4px;padding:10px 8px;margin:0 -8px;border-bottom:1px solid var(--border)}
+.check-item:last-child{border-bottom:none}
+.check-item:hover{background:var(--surface2)}
+.check-icon{width:22px;height:22px;border-radius:5px;border:1.5px solid var(--faint);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;transition:all .15s;background:transparent}
+.check-icon svg{opacity:0;transition:opacity .15s}
+.check-item.checked .check-icon{background:var(--green);border-color:var(--green)}
+.check-item.checked .check-icon svg{opacity:1}
+.check-text{flex:1}
+.check-label{font-size:13px;font-weight:500;color:var(--text);line-height:1.4}
+.check-detail{font-size:11px;color:var(--muted);margin-top:2px;font-family:var(--font-mono)}
+.check-item.checked .check-label{color:var(--muted)}
+.setup-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:4px}
+.setup-btn{padding:10px 14px;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:transparent;color:var(--muted);font-family:var(--font-body);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;text-align:left}
+.setup-btn .setup-name{font-size:13px;font-weight:700;display:block}
+.setup-btn .setup-desc{font-size:10px;font-weight:400;font-family:var(--font-mono);opacity:.7;display:block;margin-top:2px}
+.setup-btn.active-a{background:#3b82f618;border-color:var(--blue);color:var(--blue)}
+.setup-btn.active-b{background:#f9731618;border-color:var(--orange);color:var(--orange)}
+.setup-btn:hover:not(.active-a):not(.active-b){border-color:var(--faint);color:var(--text)}
+.banner{border-radius:var(--radius);padding:16px 18px;display:flex;align-items:center;gap:14px;border:1.5px solid transparent;transition:all .3s}
+.banner.go{background:var(--green-dim);border-color:var(--green)}
+.banner.stop{background:var(--red-dim);border-color:var(--red)}
+.banner.wait{background:var(--orange-dim);border-color:var(--orange)}
+.banner-icon{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.banner.go .banner-icon{background:#22c55e22}
+.banner.stop .banner-icon{background:#ef444422}
+.banner.wait .banner-icon{background:#f9731622}
+.banner-title{font-size:16px;font-weight:700;line-height:1.2}
+.banner.go .banner-title{color:var(--green)}
+.banner.stop .banner-title{color:var(--red)}
+.banner.wait .banner-title{color:var(--orange)}
+.banner-sub{font-size:12px;color:var(--muted);margin-top:3px}
+.limit-bar-wrap{margin-top:10px}
+.limit-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.limit-label{font-size:11px;font-family:var(--font-mono);color:var(--muted)}
+.limit-val{font-size:11px;font-family:var(--font-mono);color:var(--text);font-weight:600}
+.bar-track{height:5px;background:var(--border);border-radius:3px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px;transition:width .4s,background .4s}
+.reset-btn{width:100%;padding:12px;border-radius:var(--radius-sm);background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:var(--font-body);font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;margin-top:4px}
+.reset-btn:hover{border-color:var(--faint);color:var(--text)}
+.streak-row{display:flex;gap:6px;margin-top:8px}
+.streak-dot{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;font-family:var(--font-mono)}
+.streak-dot.w{background:#22c55e22;color:var(--green);border:1px solid #22c55e44}
+.streak-dot.l{background:#ef444422;color:var(--red);border:1px solid #ef444444}
+.streak-dot.empty{background:var(--surface2);border:1px solid var(--border);color:var(--faint)}
+.mood-row{display:flex;gap:8px;margin-top:2px}
+.mood-btn{flex:1;padding:8px 6px;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:transparent;cursor:pointer;font-size:18px;transition:all .15s;display:flex;align-items:center;justify-content:center}
+.mood-btn:hover{border-color:var(--faint)}
+.mood-btn.selected{border-color:var(--gold);background:#eab30811}
+.rules-panel{display:none;margin-top:8px}
+.rules-panel.open{display:block}
+.rule-item{font-size:12px;font-family:var(--font-mono);color:var(--muted);padding:5px 0;border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:flex-start}
+.rule-item:last-child{border-bottom:none}
+.rule-item::before{content:"⛔";font-size:10px;margin-top:2px;flex-shrink:0}
+.toggle-rules{background:none;border:none;color:var(--muted);font-size:11px;font-family:var(--font-mono);cursor:pointer;padding:4px 0;letter-spacing:.5px;transition:color .15s}
+.toggle-rules:hover{color:var(--text)}
+</style>
+</head>
+<body>
+<header class="header">
+  <div class="logo">
+    <svg viewBox="0 0 28 28" fill="none">
+      <rect width="28" height="28" rx="7" fill="#1a1d24"/>
+      <polyline points="4,18 9,10 13,14 18,6 24,12" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="18" cy="6" r="2.5" fill="#22c55e"/>
+    </svg>
+    <div>
+      <div class="logo-text">COCKPIT</div>
+      <div class="logo-sub">BTC · 30m / 1h</div>
+    </div>
+  </div>
+  <div class="date-badge" id="dateBadge"></div>
+</header>
+<main class="main">
+  <div class="banner wait" id="mainBanner">
+    <div class="banner-icon">⏳</div>
+    <div class="banner-text">
+      <div class="banner-title" id="bannerTitle">Выбери сетап</div>
+      <div class="banner-sub" id="bannerSub">Пройди чеклист до открытия сделки</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title"><span></span>Сетап</div>
+    <div class="setup-row">
+      <button class="setup-btn" id="btnA" onclick="selectSetup('A')">
+        <span class="setup-name">🐊 OLEGator</span>
+        <span class="setup-desc">по тренду</span>
+      </button>
+      <button class="setup-btn" id="btnB" onclick="selectSetup('B')">
+        <span class="setup-name">📉 RSI 30</span>
+        <span class="setup-desc">контртренд</span>
+      </button>
+    </div>
+  </div>
+  <div class="card" id="checklistA" style="display:none">
+    <div class="card-title"><span style="background:var(--blue)"></span>OLEGator — чеклист</div>
+    <div class="check-item" onclick="toggle(this)"><div class="check-icon"><svg width="12" height="12" viewBox="0 0 12 12"><polyline points="1.5,6 4.5,9 10.5,3" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="check-text"><div class="check-label">Аллигатор проснулся и ест</div><div class="check-detail">Lips &gt; Teeth &gt; Jaw · линии расходятся</div></div></div>
+    <div class="check-item" onclick="toggle(this)"><div class="check-icon"><svg width="12" height="12" viewBox="0 0 12 12"><polyline points="1.5,6 4.5,9 10.5,3" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="check-text"><div class="check-label">Gator оба ряда не красные</div><div class="check-detail">Хотя бы один зелёный или нейтральный</div></div></div>
+    <div class="check-item" onclick="toggle(this)"><div class="check-icon"><svg width="12" height="12" viewBox="0 0 12 12"><polyline points="1.5,6 4.5,9 10.5,3" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="check-text"><div class="check-label">Фрактал завершён (5 свечей)</div><div class="check-detail">Вне пасти · над/под Jaw</div></div></div>
+    <div class="check-item" onclick="toggle(this)"><div class="check-icon"><svg width="12" height="12" viewBox="0 0 12 12"><polyline points="1.5,6 4.5,9 10.5,3" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="check-text"><div class="check-label">AO в сторону сделки</div><div class="check-detail">Long: AO &gt; 0 · Short: AO &lt; 0</div></div></div>
+    <div class="check-item" onclick="toggle(this)"><div class="check-icon"><svg width="12" height="12" viewBox="0 0 12 12"><polyline points="1.5,6 4.5,9 10.5,3" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="check-text"><div class="check-label">HTF тренд не против</div><div class="check-detail">4h / 1D — не торгую против глобала</div></div></div>
+    <div class="check-item" onclick="toggle(this)"><div class="check-icon"><svg width="12" height="12" viewBox="0 0 12 12"><polyline points="1.5,6 4.5,9 10.5,3" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="check-text"><div class="check-label">SL за противоположным фракталом</div><div class="check-detail">Уровень определён до входа</div></div></div>
+  </div>
+  <div class="card" id="checklistB" style="display:none">
+    <div class="card-title"><span style="background:var(--orange)"></span>RSI 30 — чеклист</div>
+    <div class="check-item" onclick="toggle(this)"><div class="check-icon"><svg width="12" height="12" viewBox="0 0 12 12"><polyline points="1.5,6 4.5,9 10.5,3" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="check-text"><div class="check-label">RSI в зоне экстремума</div><div class="check-detail">&gt; 70 или &lt; 30</div></div></div>
+    <div class="check-item" onclick="toggle(this)"><div class="check-icon"><svg width="12" height="12" viewBox="0 0 12 12"><polyline points="1.5,6 4.5,9 10.5,3" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="check-text"><div class="check-label">Цена у сильного S/R уровня</div><div class="check-detail">Исторический уровень или зона объёма</div></div></div>
+    <div class="check-item" onclick="toggle(this)"><div class="check-icon"><svg width="12" height="12" viewBox="0 0 12 12"><polyline points="1.5,6 4.5,9 10.5,3" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="check-text"><div class="check-label">Разворотная свеча</div><div class="check-detail">Pin bar / Engulfing · закрылась за уровень</div></div></div>
+    <div class="check-item" onclick="toggle(this)"><div class="check-icon"><svg width="12" height="12" viewBox="0 0 12 12"><polyline points="1.5,6 4.5,9 10.5,3" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="check-text"><div class="check-label">Не против глобального тренда</div><div class="check-detail">В мощном аптренде — только лонг откат</div></div></div>
+    <div class="check-item" onclick="toggle(this)"><div class="check-icon"><svg width="12" height="12" viewBox="0 0 12 12"><polyline points="1.5,6 4.5,9 10.5,3" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="check-text"><div class="check-label">SL за экстремумом свечи</div><div class="check-detail">Уровень определён до входа</div></div></div>
+  </div>
+  <div class="card">
+    <div class="card-title"><span></span>Риск-менеджмент</div>
+    <div class="status-row">
+      <div class="stat-box">
+        <div class="stat-label">Сделок сегодня</div>
+        <div class="stat-value neutral" id="tradeCount">0</div>
+        <div class="stat-sub">лимит: 3</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Стоп на сделку</div>
+        <div class="stat-value green">5%</div>
+        <div class="stat-sub">от депозита</div>
+      </div>
+    </div>
+    <div class="limit-bar-wrap">
+      <div class="limit-row">
+        <div class="limit-label">Дневной лимит убытка</div>
+        <div class="limit-val" id="dailyLossVal">0% / 10%</div>
+      </div>
+      <div class="bar-track"><div class="bar-fill" id="dailyLossBar" style="width:0%;background:var(--green)"></div></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <button onclick="addTrade('W')" style="flex:1;padding:9px;border-radius:var(--radius-sm);border:1.5px solid #22c55e44;background:#16a34a22;color:var(--green);font-family:var(--font-body);font-size:12px;font-weight:700;cursor:pointer;transition:all .15s">+ WIN</button>
+      <button onclick="addTrade('L')" style="flex:1;padding:9px;border-radius:var(--radius-sm);border:1.5px solid #ef444444;background:#dc262622;color:var(--red);font-family:var(--font-body);font-size:12px;font-weight:700;cursor:pointer;transition:all .15s">+ LOSS</button>
+    </div>
+    <div class="streak-row" id="streakRow"></div>
+  </div>
+  <div class="card">
+    <div class="card-title"><span></span>Состояние</div>
+    <div class="mood-row" id="moodRow">
+      <button class="mood-btn" onclick="setMood(this,'🧊')" title="Спокоен">🧊</button>
+      <button class="mood-btn" onclick="setMood(this,'😤')" title="Злой">😤</button>
+      <button class="mood-btn" onclick="setMood(this,'🤑')" title="Жадность">🤑</button>
+      <button class="mood-btn" onclick="setMood(this,'😨')" title="Страх">😨</button>
+      <button class="mood-btn" onclick="setMood(this,'😴')" title="Устал">😴</button>
+    </div>
+    <div style="margin-top:10px;font-size:11px;font-family:var(--font-mono)" id="moodWarning"></div>
+  </div>
+  <div class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div class="card-title" style="margin-bottom:0"><span style="background:var(--red)"></span>Запреты системы</div>
+      <button class="toggle-rules" onclick="toggleRules()">ПОКАЗАТЬ ▾</button>
+    </div>
+    <div class="rules-panel" id="rulesPanel">
+      <div style="height:10px"></div>
+      <div class="rule-item">Аллигатор спит → сделки нет</div>
+      <div class="rule-item">Gator оба красные → сделки нет</div>
+      <div class="rule-item">Фрактал не завершён (менее 5 баров) → нет</div>
+      <div class="rule-item">Превышен дневной лимит 10% → стоп-день</div>
+      <div class="rule-item">Настроение 😤😨😴 → только наблюдение</div>
+      <div class="rule-item">Сделка "отыграться" → запрещено</div>
+      <div class="rule-item">Нет чёткого SL до входа → запрещено</div>
+    </div>
+  </div>
+  <button class="reset-btn" onclick="resetDay()">↺ Сбросить день</button>
+</main>
+<script>
+let setup=null,trades=[],mood=null;
+const LIMIT=3,DAY_LOSS=10;
+const d=new Date();
+document.getElementById('dateBadge').textContent=d.toLocaleDateString('ru-RU',{day:'numeric',month:'short',year:'numeric'});
+function selectSetup(s){
+  setup=s;
+  document.getElementById('checklistA').style.display=s==='A'?'block':'none';
+  document.getElementById('checklistB').style.display=s==='B'?'block':'none';
+  document.getElementById('btnA').className='setup-btn'+(s==='A'?' active-a':'');
+  document.getElementById('btnB').className='setup-btn'+(s==='B'?' active-b':'');
+  document.querySelectorAll('#checklist'+s+' .check-item').forEach(i=>i.classList.remove('checked'));
+  updateBanner();
+}
+function toggle(el){el.classList.toggle('checked');updateBanner();}
+function updateBanner(){
+  const losses=trades.filter(t=>t==='L').length;
+  if(losses*5>=DAY_LOSS){setBanner('stop','🛑 СТОП-ДЕНЬ','Дневной лимит убытка достигнут. Отдыхай.');return;}
+  if(trades.length>=LIMIT){setBanner('stop','ЛИМИТ СДЕЛОК','Максимум '+LIMIT+' сделки в день достигнут');return;}
+  if(mood&&['😤','😨','😴'].includes(mood)){setBanner('stop','❌ НЕ ТОРГУЙ','Состояние не позволяет. Только наблюдение.');return;}
+  if(!setup){setBanner('wait','Выбери сетап','Пройди чеклист до открытия сделки');return;}
+  const items=document.querySelectorAll('#checklist'+setup+' .check-item');
+  const checked=document.querySelectorAll('#checklist'+setup+' .check-item.checked').length;
+  if(checked===0){setBanner('wait','Пройди чеклист','Отметь все условия');return;}
+  if(checked<items.length){setBanner('wait',checked+'/'+items.length+' условий','Осталось '+(items.length-checked));return;}
+  setBanner('go','✅ МОЖНО ВХОДИТЬ','Все условия соблюдены · Риск 5%');
+}
+function setBanner(type,title,sub){
+  const b=document.getElementById('mainBanner');
+  b.className='banner '+type;
+  const icons={go:'✅',stop:'🛑',wait:'⏳'};
+  b.querySelector('.banner-icon').textContent=icons[type]||'';
+  document.getElementById('bannerTitle').textContent=title;
+  document.getElementById('bannerSub').textContent=sub;
+}
+function addTrade(r){
+  if(trades.length>=LIMIT)return;
+  trades.push(r);renderStreak();renderLimits();updateBanner();
+}
+function renderStreak(){
+  const row=document.getElementById('streakRow');row.innerHTML='';
+  for(let i=0;i<LIMIT;i++){
+    const dot=document.createElement('div');
+    if(trades[i]){dot.className='streak-dot '+(trades[i]==='W'?'w':'l');dot.textContent=trades[i]==='W'?'W':'L';}
+    else{dot.className='streak-dot empty';dot.textContent=i+1;}
+    row.appendChild(dot);
+  }
+  const tc=document.getElementById('tradeCount');
+  tc.textContent=trades.length;
+  tc.className='stat-value '+(trades.length>=LIMIT?'red':trades.length>0?'orange':'neutral');
+}
+function renderLimits(){
+  const losses=trades.filter(t=>t==='L').length;
+  const pct=Math.min(losses*5,DAY_LOSS);
+  const fill=(pct/DAY_LOSS)*100;
+  document.getElementById('dailyLossVal').textContent=pct+'% / '+DAY_LOSS+'%';
+  const bar=document.getElementById('dailyLossBar');
+  bar.style.width=fill+'%';
+  bar.style.background=fill>=100?'var(--red)':fill>=60?'var(--orange)':'var(--green)';
+}
+function setMood(btn,m){
+  document.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');mood=m;
+  const warn=document.getElementById('moodWarning');
+  if(['😤','😨','😴'].includes(m)){warn.textContent='⚠ Торговля запрещена в этом состоянии';warn.style.color='var(--red)';}
+  else if(m==='🤑'){warn.textContent='⚠ Жадность — стой строго на плане. Не увеличивай риск.';warn.style.color='var(--orange)';}
+  else{warn.textContent='✓ Состояние позволяет торговать';warn.style.color='var(--green)';}
+  updateBanner();
+}
+function toggleRules(){
+  const p=document.getElementById('rulesPanel'),btn=document.querySelector('.toggle-rules');
+  if(p.classList.contains('open')){p.classList.remove('open');btn.textContent='ПОКАЗАТЬ ▾';}
+  else{p.classList.add('open');btn.textContent='СКРЫТЬ ▴';}
+}
+function resetDay(){
+  trades=[];mood=null;setup=null;
+  document.querySelectorAll('.check-item').forEach(i=>i.classList.remove('checked'));
+  document.querySelectorAll('.setup-btn').forEach(b=>b.className='setup-btn');
+  document.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('selected'));
+  document.getElementById('checklistA').style.display='none';
+  document.getElementById('checklistB').style.display='none';
+  document.getElementById('moodWarning').textContent='';
+  renderStreak();renderLimits();updateBanner();
+}
+renderStreak();renderLimits();updateBanner();
+</script>
+</body>
+</html>
