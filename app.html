@@ -33,7 +33,7 @@ body{min-height:100dvh;display:flex;flex-direction:column;align-items:center}
 .morning-icon{font-size:36px;margin-bottom:10px;}
 .morning-title{font-size:20px;font-weight:700;letter-spacing:.3px;}
 .morning-sub{font-size:12px;color:var(--muted);font-family:var(--font-mono);margin-top:4px;}
-.morning-progress{height:3px;background:var(--border);border-radius:2px;margin-top:2px;overflow:hidden;}
+.morning-progress{height:3px;background:var(--border);border-radius:2px;margin-top:12px;overflow:hidden;}
 .morning-progress-fill{height:100%;border-radius:2px;background:var(--green);transition:width .4s;width:0%;}
 .morning-item{
   display:flex;align-items:center;gap:14px;
@@ -50,9 +50,7 @@ body{min-height:100dvh;display:flex;flex-direction:column;align-items:center}
   font-size:13px;font-weight:700;font-family:var(--font-mono);
   color:var(--muted);flex-shrink:0;transition:all .2s;
 }
-.morning-item.checked .morning-num{
-  background:var(--green);border-color:var(--green);color:#fff;
-}
+.morning-item.checked .morning-num{background:var(--green);border-color:var(--green);color:#fff;}
 .morning-item.checked .morning-num::after{content:"✓";}
 .morning-item:not(.checked) .morning-num-text{display:block;}
 .morning-item.checked .morning-num-text{display:none;}
@@ -62,8 +60,7 @@ body{min-height:100dvh;display:flex;flex-direction:column;align-items:center}
 .morning-item.checked .morning-label{color:var(--muted);}
 .morning-done-msg{
   text-align:center;font-size:12px;font-family:var(--font-mono);
-  color:var(--green);opacity:0;transition:opacity .3s;
-  margin-top:-4px;
+  color:var(--green);opacity:0;transition:opacity .3s;margin-top:-4px;
 }
 .morning-done-msg.show{opacity:1;}
 
@@ -133,13 +130,6 @@ body{min-height:100dvh;display:flex;flex-direction:column;align-items:center}
 .mood-btn{flex:1;padding:8px 6px;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:transparent;cursor:pointer;font-size:18px;transition:all .15s;display:flex;align-items:center;justify-content:center}
 .mood-btn:hover{border-color:var(--faint)}
 .mood-btn.selected{border-color:var(--gold);background:#eab30811}
-.rules-panel{display:none;margin-top:8px}
-.rules-panel.open{display:block}
-.rule-item{font-size:12px;font-family:var(--font-mono);color:var(--muted);padding:5px 0;border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:flex-start}
-.rule-item:last-child{border-bottom:none}
-.rule-item::before{content:"⛔";font-size:10px;margin-top:2px;flex-shrink:0}
-.toggle-rules{background:none;border:none;color:var(--muted);font-size:11px;font-family:var(--font-mono);cursor:pointer;padding:4px 0;letter-spacing:.5px;transition:color .15s}
-.toggle-rules:hover{color:var(--text)}
 </style>
 </head>
 <body>
@@ -151,7 +141,7 @@ body{min-height:100dvh;display:flex;flex-direction:column;align-items:center}
       <div class="morning-icon">🌅</div>
       <div class="morning-title">Начало дня</div>
       <div class="morning-sub" id="morningDate"></div>
-      <div class="morning-progress" style="margin-top:12px">
+      <div class="morning-progress">
         <div class="morning-progress-fill" id="morningProgressFill"></div>
       </div>
     </div>
@@ -201,7 +191,7 @@ body{min-height:100dvh;display:flex;flex-direction:column;align-items:center}
     <div class="banner-icon">⏳</div>
     <div class="banner-text">
       <div class="banner-title" id="bannerTitle">Выбери сетап</div>
-      <div class="banner-sub" id="bannerSub">Пройди чеклист до открытия сделки</div>
+      <div class="banner-sub" id="bannerSub">Отметь все пункты чеклиста</div>
     </div>
   </div>
   <div class="card">
@@ -273,22 +263,6 @@ body{min-height:100dvh;display:flex;flex-direction:column;align-items:center}
     </div>
     <div style="margin-top:10px;font-size:11px;font-family:var(--font-mono)" id="moodWarning"></div>
   </div>
-  <div class="card">
-    <div style="display:flex;align-items:center;justify-content:space-between">
-      <div class="card-title" style="margin-bottom:0"><span style="background:var(--red)"></span>Запреты системы</div>
-      <button class="toggle-rules" onclick="toggleRules()">ПОКАЗАТЬ ▾</button>
-    </div>
-    <div class="rules-panel" id="rulesPanel">
-      <div style="height:10px"></div>
-      <div class="rule-item">Аллигатор спит → сделки нет</div>
-      <div class="rule-item">Gator оба красные → сделки нет</div>
-      <div class="rule-item">Фрактал не завершён (менее 5 баров) → нет</div>
-      <div class="rule-item">Превышен дневной лимит 10% → стоп-день</div>
-      <div class="rule-item">Настроение 😤😨😴 → только наблюдение</div>
-      <div class="rule-item">Сделка "отыграться" → запрещено</div>
-      <div class="rule-item">Нет чёткого SL до входа → запрещено</div>
-    </div>
-  </div>
   <button class="reset-btn" onclick="resetDay()">↺ Сбросить день</button>
 </main>
 </div>
@@ -337,7 +311,7 @@ function updateBanner() {
   if (losses * 5 >= DAY_LOSS) { setBanner('stop', '🛑 СТОП-ДЕНЬ', 'Дневной лимит убытка достигнут. Отдыхай.'); return; }
   if (trades.length >= LIMIT) { setBanner('stop', 'ЛИМИТ СДЕЛОК', 'Максимум ' + LIMIT + ' сделки в день достигнут'); return; }
   if (mood && ['😤', '😨', '😴'].includes(mood)) { setBanner('stop', '❌ НЕ ТОРГУЙ', 'Состояние не позволяет. Только наблюдение.'); return; }
-  if (!setup) { setBanner('wait', 'Выбери сетап', 'Пройди чеклист до открытия сделки'); return; }
+  if (!setup) { setBanner('wait', 'Выбери сетап', 'Отметь все пункты чеклиста'); return; }
   const items = document.querySelectorAll('#checklist' + setup + ' .check-item');
   const checked = document.querySelectorAll('#checklist' + setup + ' .check-item.checked').length;
   if (checked === 0) { setBanner('wait', 'Пройди чеклист', 'Отметь все условия'); return; }
@@ -385,11 +359,6 @@ function setMood(btn, m) {
   else if (m === '🤑') { warn.textContent = '⚠ Жадность — стой строго на плане. Не увеличивай риск.'; warn.style.color = 'var(--orange)'; }
   else { warn.textContent = '✓ Состояние позволяет торговать'; warn.style.color = 'var(--green)'; }
   updateBanner();
-}
-function toggleRules() {
-  const p = document.getElementById('rulesPanel'), btn = document.querySelector('.toggle-rules');
-  if (p.classList.contains('open')) { p.classList.remove('open'); btn.textContent = 'ПОКАЗАТЬ ▾'; }
-  else { p.classList.add('open'); btn.textContent = 'СКРЫТЬ ▴'; }
 }
 function resetDay() {
   trades = []; mood = null; setup = null;
