@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Trading Cockpit</title>
+<title>Trading Setup</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -24,8 +24,7 @@ body{min-height:100dvh;display:flex;flex-direction:column;align-items:center}
 #morningScreen{
   position:fixed;inset:0;background:var(--bg);z-index:100;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:24px;
-  transition:opacity .5s,visibility .5s;
+  padding:24px;transition:opacity .5s,visibility .5s;
 }
 #morningScreen.hidden{opacity:0;visibility:hidden;pointer-events:none;}
 .morning-wrap{width:100%;max-width:400px;display:flex;flex-direction:column;gap:16px;}
@@ -38,8 +37,7 @@ body{min-height:100dvh;display:flex;flex-direction:column;align-items:center}
 .morning-item{
   display:flex;align-items:center;gap:14px;
   background:var(--surface);border:1px solid var(--border);
-  border-radius:var(--radius);padding:16px;
-  cursor:pointer;transition:all .2s;
+  border-radius:var(--radius);padding:16px;cursor:pointer;transition:all .2s;
 }
 .morning-item:hover{border-color:var(--faint);background:var(--surface2);}
 .morning-item.checked{border-color:var(--green);background:var(--green-dim);}
@@ -93,13 +91,30 @@ body{min-height:100dvh;display:flex;flex-direction:column;align-items:center}
 .check-label{font-size:13px;font-weight:500;color:var(--text);line-height:1.4}
 .check-detail{font-size:11px;color:var(--muted);margin-top:2px;font-family:var(--font-mono)}
 .check-item.checked .check-label{color:var(--muted)}
-.setup-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:4px}
+.setup-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
 .setup-btn{padding:10px 14px;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:transparent;color:var(--muted);font-family:var(--font-body);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;text-align:left}
 .setup-btn .setup-name{font-size:13px;font-weight:700;display:block}
 .setup-btn .setup-desc{font-size:10px;font-weight:400;font-family:var(--font-mono);opacity:.7;display:block;margin-top:2px}
 .setup-btn.active-a{background:#3b82f618;border-color:var(--blue);color:var(--blue)}
 .setup-btn.active-b{background:#f9731618;border-color:var(--orange);color:var(--orange)}
 .setup-btn:hover:not(.active-a):not(.active-b){border-color:var(--faint);color:var(--text)}
+/* ── TRADE PARAMS ── */
+.trade-params{display:flex;flex-direction:column;gap:10px;margin-top:4px;padding-top:12px;border-top:1px solid var(--border)}
+.param-row{display:flex;flex-direction:column;gap:6px}
+.param-label{font-size:10px;font-family:var(--font-mono);color:var(--muted);letter-spacing:.8px;text-transform:uppercase}
+.param-btns{display:flex;gap:6px}
+.param-btn{
+  flex:1;padding:8px 6px;border-radius:var(--radius-sm);
+  border:1.5px solid var(--border);background:transparent;
+  color:var(--muted);font-family:var(--font-mono);font-size:12px;font-weight:600;
+  cursor:pointer;transition:all .15s;text-align:center;
+}
+.param-btn:hover{border-color:var(--faint);color:var(--text)}
+.param-btn.sel-asset{background:#3b82f618;border-color:var(--blue);color:var(--blue)}
+.param-btn.sel-lev{background:#eab30818;border-color:var(--gold);color:var(--gold)}
+.param-btn.sel-long{background:#16a34a22;border-color:var(--green);color:var(--green)}
+.param-btn.sel-short{background:#dc262622;border-color:var(--red);color:var(--red)}
+/* ── REST ── */
 .limit-bar-wrap{margin-top:10px}
 .limit-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
 .limit-label{font-size:11px;font-family:var(--font-mono);color:var(--muted)}
@@ -167,8 +182,8 @@ body{min-height:100dvh;display:flex;flex-direction:column;align-items:center}
       <circle cx="18" cy="6" r="2.5" fill="#22c55e"/>
     </svg>
     <div>
-      <div class="logo-text">COCKPIT</div>
-      <div class="logo-sub">BTC · 30m / 1h</div>
+      <div class="logo-text">TRADING SETUP</div>
+      <div class="logo-sub">Making Trading Professional</div>
     </div>
   </div>
   <div class="date-badge" id="dateBadge"></div>
@@ -186,7 +201,34 @@ body{min-height:100dvh;display:flex;flex-direction:column;align-items:center}
         <span class="setup-desc">контртренд</span>
       </button>
     </div>
+
+    <!-- TRADE PARAMS -->
+    <div class="trade-params">
+      <div class="param-row">
+        <div class="param-label">Актив</div>
+        <div class="param-btns">
+          <button class="param-btn" id="asset-BTC" onclick="selectParam('asset','BTC',this)">₿ BTC</button>
+          <button class="param-btn" id="asset-ETH" onclick="selectParam('asset','ETH',this)">◇ ETH</button>
+          <button class="param-btn" id="asset-GOLD" onclick="selectParam('asset','GOLD',this)">✨ GOLD</button>
+        </div>
+      </div>
+      <div class="param-row">
+        <div class="param-label">Плечо</div>
+        <div class="param-btns">
+          <button class="param-btn" id="lev-X50" onclick="selectParam('lev','X50',this)">X50</button>
+          <button class="param-btn" id="lev-X25" onclick="selectParam('lev','X25',this)">X25</button>
+        </div>
+      </div>
+      <div class="param-row">
+        <div class="param-label">Направление</div>
+        <div class="param-btns">
+          <button class="param-btn" id="dir-LONG" onclick="selectParam('dir','LONG',this)">▲ LONG</button>
+          <button class="param-btn" id="dir-SHORT" onclick="selectParam('dir','SHORT',this)">▼ SHORT</button>
+        </div>
+      </div>
+    </div>
   </div>
+
   <div class="card" id="checklistA" style="display:none">
     <div class="card-title"><span style="background:var(--blue)"></span>OLEGator — чеклист</div>
     <div class="check-item" onclick="toggle(this)"><div class="check-icon"><svg width="12" height="12" viewBox="0 0 12 12"><polyline points="1.5,6 4.5,9 10.5,3" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="check-text"><div class="check-label">Аллигатор проснулся и ест</div><div class="check-detail">Lips &gt; Teeth &gt; Jaw · линии расходятся</div></div></div>
@@ -270,7 +312,20 @@ function toggleMorning(el, idx) {
 
 let setup = null, trades = [], mood = null;
 const LIMIT = 3, DAY_LOSS = 10;
+const params = { asset: null, lev: null, dir: null };
+const paramClass = { asset: 'sel-asset', lev: 'sel-lev', long: 'sel-long', short: 'sel-short' };
 
+function selectParam(type, val, btn) {
+  document.querySelectorAll('[id^="' + type + '-"]').forEach(b => {
+    b.classList.remove('sel-asset','sel-lev','sel-long','sel-short');
+  });
+  params[type] = val;
+  if (type === 'dir') {
+    btn.classList.add(val === 'LONG' ? 'sel-long' : 'sel-short');
+  } else {
+    btn.classList.add(type === 'asset' ? 'sel-asset' : 'sel-lev');
+  }
+}
 function selectSetup(s) {
   setup = s;
   document.getElementById('checklistA').style.display = s === 'A' ? 'block' : 'none';
@@ -309,12 +364,13 @@ function setMood(btn, m) {
   document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
   btn.classList.add('selected'); mood = m;
   const warn = document.getElementById('moodWarning');
-  if (['😤', '😨', '😴'].includes(m)) { warn.textContent = '⚠ Торговля запрещена в этом состоянии'; warn.style.color = 'var(--red)'; }
+  if (['😤','😨','😴'].includes(m)) { warn.textContent = '⚠ Торговля запрещена в этом состоянии'; warn.style.color = 'var(--red)'; }
   else if (m === '🤑') { warn.textContent = '⚠ Жадность — стой строго на плане'; warn.style.color = 'var(--orange)'; }
   else { warn.textContent = '✓ Состояние позволяет торговать'; warn.style.color = 'var(--green)'; }
 }
 function resetDay() {
   trades = []; mood = null; setup = null;
+  params.asset = null; params.lev = null; params.dir = null;
   morningChecked = [false, false, false];
   document.querySelectorAll('.morning-item').forEach(i => i.classList.remove('checked'));
   document.getElementById('morningProgressFill').style.width = '0%';
@@ -323,6 +379,7 @@ function resetDay() {
   document.querySelectorAll('.check-item').forEach(i => i.classList.remove('checked'));
   document.querySelectorAll('.setup-btn').forEach(b => b.className = 'setup-btn');
   document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
+  document.querySelectorAll('.param-btn').forEach(b => b.classList.remove('sel-asset','sel-lev','sel-long','sel-short'));
   document.getElementById('checklistA').style.display = 'none';
   document.getElementById('checklistB').style.display = 'none';
   document.getElementById('moodWarning').textContent = '';
