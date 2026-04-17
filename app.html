@@ -19,6 +19,56 @@
 }
 html{background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:16px;-webkit-font-smoothing:antialiased}
 body{min-height:100dvh;display:flex;flex-direction:column;align-items:center}
+
+/* ── MORNING SCREEN ── */
+#morningScreen{
+  position:fixed;inset:0;background:var(--bg);z-index:100;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:24px;
+  transition:opacity .5s,visibility .5s;
+}
+#morningScreen.hidden{opacity:0;visibility:hidden;pointer-events:none;}
+.morning-wrap{width:100%;max-width:400px;display:flex;flex-direction:column;gap:16px;}
+.morning-header{text-align:center;margin-bottom:8px;}
+.morning-icon{font-size:36px;margin-bottom:10px;}
+.morning-title{font-size:20px;font-weight:700;letter-spacing:.3px;}
+.morning-sub{font-size:12px;color:var(--muted);font-family:var(--font-mono);margin-top:4px;}
+.morning-progress{height:3px;background:var(--border);border-radius:2px;margin-top:2px;overflow:hidden;}
+.morning-progress-fill{height:100%;border-radius:2px;background:var(--green);transition:width .4s;width:0%;}
+.morning-item{
+  display:flex;align-items:center;gap:14px;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);padding:16px;
+  cursor:pointer;transition:all .2s;
+}
+.morning-item:hover{border-color:var(--faint);background:var(--surface2);}
+.morning-item.checked{border-color:var(--green);background:var(--green-dim);}
+.morning-num{
+  width:32px;height:32px;border-radius:8px;
+  background:var(--surface2);border:1.5px solid var(--faint);
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:700;font-family:var(--font-mono);
+  color:var(--muted);flex-shrink:0;transition:all .2s;
+}
+.morning-item.checked .morning-num{
+  background:var(--green);border-color:var(--green);color:#fff;
+}
+.morning-item.checked .morning-num::after{content:"✓";}
+.morning-item:not(.checked) .morning-num-text{display:block;}
+.morning-item.checked .morning-num-text{display:none;}
+.morning-text{flex:1;}
+.morning-label{font-size:14px;font-weight:600;line-height:1.3;}
+.morning-detail{font-size:11px;color:var(--muted);font-family:var(--font-mono);margin-top:3px;}
+.morning-item.checked .morning-label{color:var(--muted);}
+.morning-done-msg{
+  text-align:center;font-size:12px;font-family:var(--font-mono);
+  color:var(--green);opacity:0;transition:opacity .3s;
+  margin-top:-4px;
+}
+.morning-done-msg.show{opacity:1;}
+
+/* ── MAIN APP ── */
+#appScreen{width:100%;display:flex;flex-direction:column;align-items:center;}
 .header{width:100%;max-width:520px;display:flex;align-items:center;justify-content:space-between;padding:20px 20px 0}
 .logo{display:flex;align-items:center;gap:10px}
 .logo svg{width:28px;height:28px}
@@ -93,6 +143,45 @@ body{min-height:100dvh;display:flex;flex-direction:column;align-items:center}
 </style>
 </head>
 <body>
+
+<!-- MORNING SCREEN -->
+<div id="morningScreen">
+  <div class="morning-wrap">
+    <div class="morning-header">
+      <div class="morning-icon">🌅</div>
+      <div class="morning-title">Начало дня</div>
+      <div class="morning-sub" id="morningDate"></div>
+      <div class="morning-progress" style="margin-top:12px">
+        <div class="morning-progress-fill" id="morningProgressFill"></div>
+      </div>
+    </div>
+    <div class="morning-item" onclick="toggleMorning(this,0)">
+      <div class="morning-num"><span class="morning-num-text">1</span></div>
+      <div class="morning-text">
+        <div class="morning-label">Проверить новости и экономический календарь</div>
+        <div class="morning-detail">Важные события дня · макро-риски</div>
+      </div>
+    </div>
+    <div class="morning-item" onclick="toggleMorning(this,1)">
+      <div class="morning-num"><span class="morning-num-text">2</span></div>
+      <div class="morning-text">
+        <div class="morning-label">Проверить график BTC</div>
+        <div class="morning-detail">1D / 4h / 1h · общий контекст рынка</div>
+      </div>
+    </div>
+    <div class="morning-item" onclick="toggleMorning(this,2)">
+      <div class="morning-num"><span class="morning-num-text">3</span></div>
+      <div class="morning-text">
+        <div class="morning-label">Оценить состояние</div>
+        <div class="morning-detail">Самочувствие · концентрация · готовность</div>
+      </div>
+    </div>
+    <div class="morning-done-msg" id="morningDoneMsg">✓ Все выполнено — переход к торговле...</div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="appScreen">
 <header class="header">
   <div class="logo">
     <svg viewBox="0 0 28 28" fill="none">
@@ -202,91 +291,122 @@ body{min-height:100dvh;display:flex;flex-direction:column;align-items:center}
   </div>
   <button class="reset-btn" onclick="resetDay()">↺ Сбросить день</button>
 </main>
+</div>
+
 <script>
-let setup=null,trades=[],mood=null;
-const LIMIT=3,DAY_LOSS=10;
-const d=new Date();
-document.getElementById('dateBadge').textContent=d.toLocaleDateString('ru-RU',{day:'numeric',month:'short',year:'numeric'});
-function selectSetup(s){
-  setup=s;
-  document.getElementById('checklistA').style.display=s==='A'?'block':'none';
-  document.getElementById('checklistB').style.display=s==='B'?'block':'none';
-  document.getElementById('btnA').className='setup-btn'+(s==='A'?' active-a':'');
-  document.getElementById('btnB').className='setup-btn'+(s==='B'?' active-b':'');
-  document.querySelectorAll('#checklist'+s+' .check-item').forEach(i=>i.classList.remove('checked'));
+// ── MORNING LOGIC ──
+const MORNING_TOTAL = 3;
+let morningChecked = [false, false, false];
+
+const d = new Date();
+document.getElementById('morningDate').textContent =
+  d.toLocaleDateString('ru-RU', {weekday:'long', day:'numeric', month:'long'});
+document.getElementById('dateBadge').textContent =
+  d.toLocaleDateString('ru-RU', {day:'numeric', month:'short', year:'numeric'});
+
+function toggleMorning(el, idx) {
+  morningChecked[idx] = !morningChecked[idx];
+  el.classList.toggle('checked', morningChecked[idx]);
+  const done = morningChecked.filter(Boolean).length;
+  document.getElementById('morningProgressFill').style.width = (done / MORNING_TOTAL * 100) + '%';
+  if (done === MORNING_TOTAL) {
+    const msg = document.getElementById('morningDoneMsg');
+    msg.classList.add('show');
+    setTimeout(() => {
+      document.getElementById('morningScreen').classList.add('hidden');
+    }, 1200);
+  }
+}
+
+// ── MAIN LOGIC ──
+let setup = null, trades = [], mood = null;
+const LIMIT = 3, DAY_LOSS = 10;
+
+function selectSetup(s) {
+  setup = s;
+  document.getElementById('checklistA').style.display = s === 'A' ? 'block' : 'none';
+  document.getElementById('checklistB').style.display = s === 'B' ? 'block' : 'none';
+  document.getElementById('btnA').className = 'setup-btn' + (s === 'A' ? ' active-a' : '');
+  document.getElementById('btnB').className = 'setup-btn' + (s === 'B' ? ' active-b' : '');
+  document.querySelectorAll('#checklist' + s + ' .check-item').forEach(i => i.classList.remove('checked'));
   updateBanner();
 }
-function toggle(el){el.classList.toggle('checked');updateBanner();}
-function updateBanner(){
-  const losses=trades.filter(t=>t==='L').length;
-  if(losses*5>=DAY_LOSS){setBanner('stop','🛑 СТОП-ДЕНЬ','Дневной лимит убытка достигнут. Отдыхай.');return;}
-  if(trades.length>=LIMIT){setBanner('stop','ЛИМИТ СДЕЛОК','Максимум '+LIMIT+' сделки в день достигнут');return;}
-  if(mood&&['😤','😨','😴'].includes(mood)){setBanner('stop','❌ НЕ ТОРГУЙ','Состояние не позволяет. Только наблюдение.');return;}
-  if(!setup){setBanner('wait','Выбери сетап','Пройди чеклист до открытия сделки');return;}
-  const items=document.querySelectorAll('#checklist'+setup+' .check-item');
-  const checked=document.querySelectorAll('#checklist'+setup+' .check-item.checked').length;
-  if(checked===0){setBanner('wait','Пройди чеклист','Отметь все условия');return;}
-  if(checked<items.length){setBanner('wait',checked+'/'+items.length+' условий','Осталось '+(items.length-checked));return;}
-  setBanner('go','✅ МОЖНО ВХОДИТЬ','Все условия соблюдены · Риск 5%');
+function toggle(el) { el.classList.toggle('checked'); updateBanner(); }
+function updateBanner() {
+  const losses = trades.filter(t => t === 'L').length;
+  if (losses * 5 >= DAY_LOSS) { setBanner('stop', '🛑 СТОП-ДЕНЬ', 'Дневной лимит убытка достигнут. Отдыхай.'); return; }
+  if (trades.length >= LIMIT) { setBanner('stop', 'ЛИМИТ СДЕЛОК', 'Максимум ' + LIMIT + ' сделки в день достигнут'); return; }
+  if (mood && ['😤', '😨', '😴'].includes(mood)) { setBanner('stop', '❌ НЕ ТОРГУЙ', 'Состояние не позволяет. Только наблюдение.'); return; }
+  if (!setup) { setBanner('wait', 'Выбери сетап', 'Пройди чеклист до открытия сделки'); return; }
+  const items = document.querySelectorAll('#checklist' + setup + ' .check-item');
+  const checked = document.querySelectorAll('#checklist' + setup + ' .check-item.checked').length;
+  if (checked === 0) { setBanner('wait', 'Пройди чеклист', 'Отметь все условия'); return; }
+  if (checked < items.length) { setBanner('wait', checked + '/' + items.length + ' условий', 'Осталось ' + (items.length - checked)); return; }
+  setBanner('go', '✅ МОЖНО ВХОДИТЬ', 'Все условия соблюдены · Риск 5%');
 }
-function setBanner(type,title,sub){
-  const b=document.getElementById('mainBanner');
-  b.className='banner '+type;
-  const icons={go:'✅',stop:'🛑',wait:'⏳'};
-  b.querySelector('.banner-icon').textContent=icons[type]||'';
-  document.getElementById('bannerTitle').textContent=title;
-  document.getElementById('bannerSub').textContent=sub;
+function setBanner(type, title, sub) {
+  const b = document.getElementById('mainBanner');
+  b.className = 'banner ' + type;
+  const icons = { go: '✅', stop: '🛑', wait: '⏳' };
+  b.querySelector('.banner-icon').textContent = icons[type] || '';
+  document.getElementById('bannerTitle').textContent = title;
+  document.getElementById('bannerSub').textContent = sub;
 }
-function addTrade(r){
-  if(trades.length>=LIMIT)return;
-  trades.push(r);renderStreak();renderLimits();updateBanner();
+function addTrade(r) {
+  if (trades.length >= LIMIT) return;
+  trades.push(r); renderStreak(); renderLimits(); updateBanner();
 }
-function renderStreak(){
-  const row=document.getElementById('streakRow');row.innerHTML='';
-  for(let i=0;i<LIMIT;i++){
-    const dot=document.createElement('div');
-    if(trades[i]){dot.className='streak-dot '+(trades[i]==='W'?'w':'l');dot.textContent=trades[i]==='W'?'W':'L';}
-    else{dot.className='streak-dot empty';dot.textContent=i+1;}
+function renderStreak() {
+  const row = document.getElementById('streakRow'); row.innerHTML = '';
+  for (let i = 0; i < LIMIT; i++) {
+    const dot = document.createElement('div');
+    if (trades[i]) { dot.className = 'streak-dot ' + (trades[i] === 'W' ? 'w' : 'l'); dot.textContent = trades[i] === 'W' ? 'W' : 'L'; }
+    else { dot.className = 'streak-dot empty'; dot.textContent = i + 1; }
     row.appendChild(dot);
   }
-  const tc=document.getElementById('tradeCount');
-  tc.textContent=trades.length;
-  tc.className='stat-value '+(trades.length>=LIMIT?'red':trades.length>0?'orange':'neutral');
+  const tc = document.getElementById('tradeCount');
+  tc.textContent = trades.length;
+  tc.className = 'stat-value ' + (trades.length >= LIMIT ? 'red' : trades.length > 0 ? 'orange' : 'neutral');
 }
-function renderLimits(){
-  const losses=trades.filter(t=>t==='L').length;
-  const pct=Math.min(losses*5,DAY_LOSS);
-  const fill=(pct/DAY_LOSS)*100;
-  document.getElementById('dailyLossVal').textContent=pct+'% / '+DAY_LOSS+'%';
-  const bar=document.getElementById('dailyLossBar');
-  bar.style.width=fill+'%';
-  bar.style.background=fill>=100?'var(--red)':fill>=60?'var(--orange)':'var(--green)';
+function renderLimits() {
+  const losses = trades.filter(t => t === 'L').length;
+  const pct = Math.min(losses * 5, DAY_LOSS);
+  const fill = (pct / DAY_LOSS) * 100;
+  document.getElementById('dailyLossVal').textContent = pct + '% / ' + DAY_LOSS + '%';
+  const bar = document.getElementById('dailyLossBar');
+  bar.style.width = fill + '%';
+  bar.style.background = fill >= 100 ? 'var(--red)' : fill >= 60 ? 'var(--orange)' : 'var(--green)';
 }
-function setMood(btn,m){
-  document.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('selected'));
-  btn.classList.add('selected');mood=m;
-  const warn=document.getElementById('moodWarning');
-  if(['😤','😨','😴'].includes(m)){warn.textContent='⚠ Торговля запрещена в этом состоянии';warn.style.color='var(--red)';}
-  else if(m==='🤑'){warn.textContent='⚠ Жадность — стой строго на плане. Не увеличивай риск.';warn.style.color='var(--orange)';}
-  else{warn.textContent='✓ Состояние позволяет торговать';warn.style.color='var(--green)';}
+function setMood(btn, m) {
+  document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected'); mood = m;
+  const warn = document.getElementById('moodWarning');
+  if (['😤', '😨', '😴'].includes(m)) { warn.textContent = '⚠ Торговля запрещена в этом состоянии'; warn.style.color = 'var(--red)'; }
+  else if (m === '🤑') { warn.textContent = '⚠ Жадность — стой строго на плане. Не увеличивай риск.'; warn.style.color = 'var(--orange)'; }
+  else { warn.textContent = '✓ Состояние позволяет торговать'; warn.style.color = 'var(--green)'; }
   updateBanner();
 }
-function toggleRules(){
-  const p=document.getElementById('rulesPanel'),btn=document.querySelector('.toggle-rules');
-  if(p.classList.contains('open')){p.classList.remove('open');btn.textContent='ПОКАЗАТЬ ▾';}
-  else{p.classList.add('open');btn.textContent='СКРЫТЬ ▴';}
+function toggleRules() {
+  const p = document.getElementById('rulesPanel'), btn = document.querySelector('.toggle-rules');
+  if (p.classList.contains('open')) { p.classList.remove('open'); btn.textContent = 'ПОКАЗАТЬ ▾'; }
+  else { p.classList.add('open'); btn.textContent = 'СКРЫТЬ ▴'; }
 }
-function resetDay(){
-  trades=[];mood=null;setup=null;
-  document.querySelectorAll('.check-item').forEach(i=>i.classList.remove('checked'));
-  document.querySelectorAll('.setup-btn').forEach(b=>b.className='setup-btn');
-  document.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('selected'));
-  document.getElementById('checklistA').style.display='none';
-  document.getElementById('checklistB').style.display='none';
-  document.getElementById('moodWarning').textContent='';
-  renderStreak();renderLimits();updateBanner();
+function resetDay() {
+  trades = []; mood = null; setup = null;
+  morningChecked = [false, false, false];
+  document.querySelectorAll('.morning-item').forEach(i => i.classList.remove('checked'));
+  document.getElementById('morningProgressFill').style.width = '0%';
+  document.getElementById('morningDoneMsg').classList.remove('show');
+  document.getElementById('morningScreen').classList.remove('hidden');
+  document.querySelectorAll('.check-item').forEach(i => i.classList.remove('checked'));
+  document.querySelectorAll('.setup-btn').forEach(b => b.className = 'setup-btn');
+  document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
+  document.getElementById('checklistA').style.display = 'none';
+  document.getElementById('checklistB').style.display = 'none';
+  document.getElementById('moodWarning').textContent = '';
+  renderStreak(); renderLimits(); updateBanner();
 }
-renderStreak();renderLimits();updateBanner();
+renderStreak(); renderLimits(); updateBanner();
 </script>
 </body>
 </html>
