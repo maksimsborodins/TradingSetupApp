@@ -12,8 +12,8 @@
 :root{
   --bg:#0d0e10;--surface:#13151a;--surface2:#1a1d24;--border:#252830;
   --text:#e8eaf0;--muted:#6b7280;--faint:#3a3f4a;
-  --green:#22c55e;--green-dim:#16a34a22;--red:#ef4444;--red-dim:#dc262622;
-  --orange:#f97316;--orange-dim:#ea580c22;--blue:#3b82f6;--gold:#eab308;
+  --green:#22c55e;--green-dim:#16a34a22;--red:#ef4444;
+  --orange:#f97316;--blue:#3b82f6;--gold:#eab308;
   --radius:10px;--radius-sm:6px;
   --font-body:'Space Grotesk',sans-serif;--font-mono:'JetBrains Mono',monospace;
 }
@@ -134,10 +134,6 @@ body{min-height:100dvh;display:flex;flex-direction:column;align-items:center}
 .streak-dot.w{background:#22c55e22;color:var(--green);border:1px solid #22c55e44}
 .streak-dot.l{background:#ef444422;color:var(--red);border:1px solid #ef444444}
 .streak-dot.empty{background:var(--surface2);border:1px solid var(--border);color:var(--faint)}
-.mood-row{display:flex;gap:8px;margin-top:2px}
-.mood-btn{flex:1;padding:8px 6px;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:transparent;cursor:pointer;font-size:18px;transition:all .15s;display:flex;align-items:center;justify-content:center}
-.mood-btn:hover{border-color:var(--faint)}
-.mood-btn.selected{border-color:var(--gold);background:#eab30811}
 .mentor-textarea{width:100%;min-height:220px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;color:var(--text);font-family:var(--font-mono);font-size:12px;line-height:1.7;resize:vertical;outline:none;transition:border .15s;}
 .mentor-textarea:focus{border-color:var(--faint);}
 .mentor-copy{margin-top:8px;width:100%;padding:9px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface2);color:var(--muted);font-family:var(--font-body);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;}
@@ -203,6 +199,7 @@ body{min-height:100dvh;display:flex;flex-direction:column;align-items:center}
 </header>
 <main class="main">
 
+  <!-- SETUP CARD -->
   <div class="card">
     <div class="card-title"><span></span>Сетап</div>
     <div class="setup-row">
@@ -241,14 +238,10 @@ body{min-height:100dvh;display:flex;flex-direction:column;align-items:center}
     </div>
   </div>
 
-  <!-- OLEGATOR CHECKLIST -->
+  <!-- OLEGATOR CHECKLIST (динамический) -->
   <div class="card" id="checklistA" style="display:none">
     <div class="card-title"><span style="background:var(--blue)"></span>OLEGator — чеклист</div>
-    <div class="check-item" onclick="toggle(this)"><div class="check-icon"><svg width="12" height="12" viewBox="0 0 12 12"><polyline points="1.5,6 4.5,9 10.5,3" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="check-text"><div class="check-label">После смыкания челюсти прошло 10 свечей</div><div class="check-detail">Даём время на боковик · распиливаем ранних разворотчиков</div></div></div>
-    <div class="check-item" onclick="toggle(this)"><div class="check-icon"><svg width="12" height="12" viewBox="0 0 12 12"><polyline points="1.5,6 4.5,9 10.5,3" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="check-text"><div class="check-label">Аллигатор открыл рот и ест</div><div class="check-detail">Lips > Teeth > Jaw · линии расходятся</div></div></div>
-    <div class="check-item" onclick="toggle(this)"><div class="check-icon"><svg width="12" height="12" viewBox="0 0 12 12"><polyline points="1.5,6 4.5,9 10.5,3" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="check-text"><div class="check-label">Фрактал под челюстью сформирован</div><div class="check-detail">5 баров завершены · фрактал ниже Jaw</div></div></div>
-    <div class="check-item" onclick="toggle(this)"><div class="check-icon"><svg width="12" height="12" viewBox="0 0 12 12"><polyline points="1.5,6 4.5,9 10.5,3" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="check-text"><div class="check-label">Фрактал под челюстью снят</div><div class="check-detail">Цена пробила и закрылась за фрактал</div></div></div>
-    <div class="check-item" onclick="toggle(this)"><div class="check-icon"><svg width="12" height="12" viewBox="0 0 12 12"><polyline points="1.5,6 4.5,9 10.5,3" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="check-text"><div class="check-label">Стоп за фрактал над челюстью</div><div class="check-detail">Уровень SL определён до входа</div></div></div>
+    <div id="checklistAItems"></div>
   </div>
 
   <!-- RSI CHECKLIST -->
@@ -291,19 +284,6 @@ body{min-height:100dvh;display:flex;flex-direction:column;align-items:center}
     <div class="streak-row" id="streakRow"></div>
   </div>
 
-  <!-- MOOD -->
-  <div class="card">
-    <div class="card-title"><span></span>Состояние</div>
-    <div class="mood-row">
-      <button class="mood-btn" onclick="setMood(this,'🧊')">🧊</button>
-      <button class="mood-btn" onclick="setMood(this,'😤')">😤</button>
-      <button class="mood-btn" onclick="setMood(this,'🤑')">🤑</button>
-      <button class="mood-btn" onclick="setMood(this,'😨')">😨</button>
-      <button class="mood-btn" onclick="setMood(this,'😴')">😴</button>
-    </div>
-    <div style="margin-top:10px;font-size:11px;font-family:var(--font-mono)" id="moodWarning"></div>
-  </div>
-
   <!-- MENTOR REPORT -->
   <div class="card">
     <div class="card-title"><span></span>Отчёт для ментора</div>
@@ -332,9 +312,45 @@ function toggleMorning(el,idx){
   }
 }
 
-let setup=null,trades=[],mood=null;
+let setup=null,trades=[];
 const LIMIT=3,DAY_LOSS=10;
 const params={asset:'BTC',lev:'X50',dir:'LONG'};
+
+// OLEGator checklist — зависит от направления
+const checklistAData={
+  LONG:[
+    {label:'После смыкания челюсти прошло 10 свечей', detail:'Даём время на боковик · распиливаем ранних разворотчиков'},
+    {label:'Аллигатор открыл рот и ест', detail:'Lips > Teeth > Jaw · линии расходятся'},
+    {label:'Фрактал над челюстью сформирован', detail:'5 баров завершены · фрактал выше Jaw'},
+    {label:'Фрактал над челюстью снят', detail:'Цена пробила и закрылась за фрактал'},
+    {label:'Стоп за фрактал под челюстью', detail:'Уровень SL определён до входа'}
+  ],
+  SHORT:[
+    {label:'После смыкания челюсти прошло 10 свечей', detail:'Даём время на боковик · распиливаем ранних разворотчиков'},
+    {label:'Аллигатор открыл рот и ест', detail:'Lips > Teeth > Jaw · линии расходятся'},
+    {label:'Фрактал под челюстью сформирован', detail:'5 баров завершены · фрактал ниже Jaw'},
+    {label:'Фрактал под челюстью снят', detail:'Цена пробила и закрылась за фрактал'},
+    {label:'Стоп за фрактал над челюстью', detail:'Уровень SL определён до входа'}
+  ]
+};
+
+const checkSVG='<svg width="12" height="12" viewBox="0 0 12 12"><polyline points="1.5,6 4.5,9 10.5,3" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+function buildChecklistA(){
+  const dir=params.dir;
+  const items=checklistAData[dir];
+  const container=document.getElementById('checklistAItems');
+  container.innerHTML=items.map(item=>`
+    <div class="check-item" onclick="toggle(this)">
+      <div class="check-icon">${checkSVG}</div>
+      <div class="check-text">
+        <div class="check-label">${item.label}</div>
+        <div class="check-detail">${item.detail}</div>
+      </div>
+    </div>
+  `).join('');
+  updateMentorReport();
+}
 
 function toggleDrop(type){
   const isOpen=document.getElementById('drop-'+type).classList.contains('open');
@@ -359,7 +375,8 @@ function pickParam(type,val){
     item.classList.toggle('sel',item.textContent.trim()===val);
   });
   closeAllDrops();
-  updateMentorReport();
+  if(type==='dir' && setup==='A') buildChecklistA();
+  else updateMentorReport();
 }
 function selectSetup(s){
   setup=s;
@@ -367,7 +384,8 @@ function selectSetup(s){
   document.getElementById('checklistB').style.display=s==='B'?'block':'none';
   document.getElementById('btnA').className='setup-btn'+(s==='A'?' active-a':'');
   document.getElementById('btnB').className='setup-btn'+(s==='B'?' active-b':'');
-  document.querySelectorAll('#checklist'+s+' .check-item').forEach(i=>i.classList.remove('checked'));
+  if(s==='A') buildChecklistA();
+  else document.querySelectorAll('#checklistB .check-item').forEach(i=>i.classList.remove('checked'));
   updateMentorReport();
 }
 function toggle(el){
@@ -403,44 +421,23 @@ function renderLimits(){
     document.getElementById('appScreen').classList.add('blurred');
   }
 }
-function setMood(btn,m){
-  document.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('selected'));
-  btn.classList.add('selected');mood=m;
-  const warn=document.getElementById('moodWarning');
-  if(['😤','😨','😴'].includes(m)){warn.textContent='⚠ Торговля запрещена в этом состоянии';warn.style.color='var(--red)';}
-  else if(m==='🤑'){warn.textContent='⚠ Жадность — стой строго на плане';warn.style.color='var(--orange)';}
-  else{warn.textContent='✓ Состояние позволяет торговать';warn.style.color='var(--green)';}
-}
 
-const checklistLabelsA=[
-  'После смыкания челюсти прошло 10 свечей',
-  'Аллигатор открыл рот и ест',
-  'Фрактал под челюстью сформирован',
-  'Фрактал под челюстью снят',
-  'Стоп за фрактал над челюстью'
-];
-const checklistLabelsB=[
-  'RSI 30m выше 70 или ниже 30',
-  'RSI 1h выше 70 или ниже 30',
-  'Цена у сильного уровня поддержки/сопротивления',
-  'Цена у трендовой линии',
-  'Разворотная свеча / формация',
-  'Стоп и тейки выставлены по сетке Фибоначчи'
-];
 function getCheckedLabels(){
   if(!setup) return [];
-  const labels=setup==='A'?checklistLabelsA:checklistLabelsB;
-  const items=document.querySelectorAll('#checklist'+setup+' .check-item');
-  const result=[];
-  items.forEach((item,i)=>{
-    result.push((item.classList.contains('checked')?'✅ ':'⬜ ')+labels[i]);
-  });
-  return result;
+  let labels=[];
+  let items=[];
+  if(setup==='A'){
+    labels=checklistAData[params.dir].map(i=>i.label);
+    items=[...document.querySelectorAll('#checklistAItems .check-item')];
+  } else {
+    labels=['RSI 30m выше 70 или ниже 30','RSI 1h выше 70 или ниже 30','Цена у сильного уровня поддержки/сопротивления','Цена у трендовой линии','Разворотная свеча / формация','Стоп и тейки выставлены по сетке Фибоначчи'];
+    items=[...document.querySelectorAll('#checklistB .check-item')];
+  }
+  return items.map((item,i)=>(item.classList.contains('checked')?'✅ ':'⬜ ')+labels[i]);
 }
 function updateMentorReport(){
   const strat=setup==='A'?'OLEGator':setup==='B'?'RSI30m':'—';
-  const checklist=getCheckedLabels();
-  const checkStr=checklist.length>0?checklist.join('\n'):'(чеклист не выбран)';
+  const checkStr=getCheckedLabels().join('\n')||'(чеклист не выбран)';
   document.getElementById('mentorText').value=
 `Привет брат!
 
